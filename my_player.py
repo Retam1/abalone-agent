@@ -89,6 +89,10 @@ class MyPlayer(PlayerAbalone):
 
         return score, action
 
+    def cutoff_depth(self, depth):
+        # TODO : déterminer un depth
+        return depth > 5
+
     def heuristic(self, state):
         other_player = next(player for player in state.players if player.get_id() != state.get_next_player().get_id())
         return state.get_scores().get(state.get_next_player().get_id()) - state.get_scores().get(other_player.get_id())
