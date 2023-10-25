@@ -38,6 +38,7 @@ class MyPlayer(PlayerAbalone):
             Action: selected feasible action
         """
         # TODO
+        score, action = self.minimax_search(current_state)
         raise MethodNotImplementedError()
 
     def minimax_search(self, initial_state: GameState):
@@ -62,6 +63,17 @@ class MyPlayer(PlayerAbalone):
 
     def min_value(self, state: GameState):
         if state.is_done():
-            
+            return state.compute_scores(state.next_player.get_id(), None)
 
-        return None
+        score = sys.maxsize
+        action = None
+
+        for new_action in state.get_possible_actions():
+            new_state = action.next_game_state
+            new_score, _ = self.max_value(new_state)
+
+            if new_score < score:
+                score = new_score
+                action = new_action
+
+        return score, action
