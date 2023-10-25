@@ -1,10 +1,12 @@
 # Authors: Émile Watier (2115718) and Lana Pham (2116078)
-import sys
+import math
 
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
 from seahorse.utils.custom_exceptions import MethodNotImplementedError
+
+infinity = math.inf
 
 
 class MyPlayer(PlayerAbalone):
@@ -26,6 +28,7 @@ class MyPlayer(PlayerAbalone):
         """
         super().__init__(piece_type, name, time_limit, *args)
 
+
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
         Function to implement the logic of the player.
@@ -42,13 +45,13 @@ class MyPlayer(PlayerAbalone):
         return action
 
     def minimax_search(self, initial_state: GameState):
-        return self.max_value(initial_state, -sys.maxsize - 1, sys.maxsize)
+        return self.max_value(initial_state, -infinity, infinity)
 
-    def max_value(self, state: GameState, alpha: int, beta: int):
+    def max_value(self, state: GameState, alpha: float, beta: float):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        score = -sys.maxsize - 1
+        score = -infinity
         action = None
 
         for new_action in state.get_possible_actions():
@@ -65,11 +68,11 @@ class MyPlayer(PlayerAbalone):
 
         return score, action
 
-    def min_value(self, state: GameState, alpha: int, beta: int):
+    def min_value(self, state: GameState, alpha: float, beta: float):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        score = sys.maxsize
+        score = infinity
         action = None
 
         for new_action in state.get_possible_actions():
