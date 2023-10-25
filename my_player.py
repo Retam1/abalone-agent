@@ -45,18 +45,21 @@ class MyPlayer(PlayerAbalone):
         return action
 
     def minimax_search(self, initial_state: GameState):
-        return self.max_value(initial_state, -infinity, infinity)
+        return self.max_value(initial_state, -infinity, infinity, 0)
 
-    def max_value(self, state: GameState, alpha: float, beta: float):
+    def max_value(self, state: GameState, alpha: float, beta: float, depth: int):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
+
+        if self.cutoff_depth(depth):
+            return self.heuristic(state)
 
         score = -infinity
         action = None
 
         for new_action in state.get_possible_actions():
             new_state = new_action.get_next_game_state()
-            new_score, _ = self.min_value(new_state, alpha, beta)
+            new_score, _ = self.min_value(new_state, alpha, beta, depth+1)
 
             if new_score > score:
                 score = new_score
@@ -68,16 +71,19 @@ class MyPlayer(PlayerAbalone):
 
         return score, action
 
-    def min_value(self, state: GameState, alpha: float, beta: float):
+    def min_value(self, state: GameState, alpha: float, beta: float, depth: int):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
+
+        if self.cutoff_depth(depth):
+            return self.heuristic(state)
 
         score = infinity
         action = None
 
         for new_action in state.get_possible_actions():
             new_state = new_action.get_next_game_state()
-            new_score, _ = self.max_value(new_state, alpha, beta)
+            new_score, _ = self.max_value(new_state, alpha, beta, depth+1)
 
             if new_score < score:
                 score = new_score
