@@ -38,3 +38,7 @@ class MyPlayer(PlayerAbalone):
         """
         # TODO
         raise MethodNotImplementedError()
+
+    def minimax_search(self, initial_state: GameState):
+        return self.max_value(initial_state)
+        return None
