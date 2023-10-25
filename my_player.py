@@ -39,20 +39,20 @@ class MyPlayer(PlayerAbalone):
         """
         # TODO
         score, action = self.minimax_search(current_state)
-        raise MethodNotImplementedError()
+        return action
 
     def minimax_search(self, initial_state: GameState):
         return self.max_value(initial_state)
 
     def max_value(self, state: GameState):
         if state.is_done():
-            return state.compute_scores().get(state.next_player.get_id(), None)
+            return state.get_scores().get(state.get_next_player().get_id()), None
 
         score = -sys.maxsize - 1
         action = None
 
         for new_action in state.get_possible_actions():
-            new_state = action.next_game_state
+            new_state = new_action.get_next_game_state()
             new_score, _ = self.min_value(new_state)
 
             if new_score > score:
@@ -63,13 +63,13 @@ class MyPlayer(PlayerAbalone):
 
     def min_value(self, state: GameState):
         if state.is_done():
-            return state.compute_scores(state.next_player.get_id(), None)
+            return state.get_scores().get(state.get_next_player().get_id()), None
 
         score = sys.maxsize
         action = None
 
         for new_action in state.get_possible_actions():
-            new_state = action.next_game_state
+            new_state = new_action.get_next_game_state()
             new_score, _ = self.max_value(new_state)
 
             if new_score < score:
