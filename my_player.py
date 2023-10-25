@@ -1,3 +1,5 @@
+# Authors: Émile Watier (2115718) and Lana Pham (2116078)
+
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
