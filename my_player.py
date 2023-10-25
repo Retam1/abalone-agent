@@ -88,3 +88,7 @@ class MyPlayer(PlayerAbalone):
                 return score, action
 
         return score, action
+
+    def heuristic(self, state):
+        other_player = next(player for player in state.players if player.get_id() != state.get_next_player().get_id())
+        return state.get_scores().get(state.get_next_player().get_id()) - state.get_scores().get(other_player.get_id())
