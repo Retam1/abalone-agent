@@ -14,7 +14,7 @@ class MyPlayer(PlayerAbalone):
         piece_type (str): piece type of the player
     """
 
-    def __init__(self, piece_type: str, name: str = "bob", time_limit: float=60*15,*args) -> None:
+    def __init__(self, piece_type: str, name: str = "bob", time_limit: float = 60 * 15, *args) -> None:
         """
         Initialize the PlayerAbalone instance.
 
@@ -23,8 +23,7 @@ class MyPlayer(PlayerAbalone):
             name (str, optional): Name of the player (default is "bob")
             time_limit (float, optional): the time limit in (s)
         """
-        super().__init__(piece_type,name,time_limit,*args)
-
+        super().__init__(piece_type, name, time_limit, *args)
 
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
@@ -37,5 +36,5 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
-        #TODO
+        # TODO
         raise MethodNotImplementedError()
