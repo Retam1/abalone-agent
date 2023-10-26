@@ -4,9 +4,9 @@ import math
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
-from seahorse.utils.custom_exceptions import MethodNotImplementedError
 
 infinity = math.inf
+center = (8, 4)
 
 
 class MyPlayer(PlayerAbalone):
@@ -27,7 +27,7 @@ class MyPlayer(PlayerAbalone):
             time_limit (float, optional): the time limit in (s)
         """
         super().__init__(piece_type, name, time_limit, *args)
-
+        self.other_player = None
 
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
@@ -40,7 +40,7 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
-        # TODO
+        self.other_player = next(player for player in current_state.players if player.get_id() != self.id).get_id()
         score, action = self.minimax_search(current_state)
         return action
 
@@ -52,14 +52,14 @@ class MyPlayer(PlayerAbalone):
             return state.get_scores().get(state.get_next_player().get_id()), None
 
         if self.cutoff_depth(depth):
-            return self.heuristic(state)
+            return self.heuristic(state), None
 
         score = -infinity
         action = None
 
         for new_action in state.get_possible_actions():
             new_state = new_action.get_next_game_state()
-            new_score, _ = self.min_value(new_state, alpha, beta, depth+1)
+            new_score, _ = self.min_value(new_state, alpha, beta, depth + 1)
 
             if new_score > score:
                 score = new_score
@@ -67,8 +67,7 @@ class MyPlayer(PlayerAbalone):
                 alpha = max(alpha, score)
 
             if score >= beta:
-                return score, action
-
+                break
         return score, action
 
     def min_value(self, state: GameState, alpha: float, beta: float, depth: int):
@@ -76,14 +75,14 @@ class MyPlayer(PlayerAbalone):
             return state.get_scores().get(state.get_next_player().get_id()), None
 
         if self.cutoff_depth(depth):
-            return self.heuristic(state)
+            return self.heuristic(state), None
 
         score = infinity
         action = None
 
         for new_action in state.get_possible_actions():
             new_state = new_action.get_next_game_state()
-            new_score, _ = self.max_value(new_state, alpha, beta, depth+1)
+            new_score, _ = self.max_value(new_state, alpha, beta, depth + 1)
 
             if new_score < score:
                 score = new_score
@@ -91,14 +90,33 @@ class MyPlayer(PlayerAbalone):
                 beta = min(beta, score)
 
             if score <= alpha:
-                return score, action
+                break
 
         return score, action
 
     def cutoff_depth(self, depth):
         # TODO : déterminer un depth
-        return depth > 5
+        return depth >= 3
 
     def heuristic(self, state):
-        other_player = next(player for player in state.players if player.get_id() != state.get_next_player().get_id())
-        return state.get_scores().get(state.get_next_player().get_id()) - state.get_scores().get(other_player.get_id())
+        score = 0
+        score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state, self.id)
+        score += self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+        return score
+
+    def distance_to_center_heuristic(self, state: GameState, player_id: int):
+        score = 0
+        for key, value in state.get_rep().env.items():
+            if value.owner_id == player_id:
+                score += self.euclidian_distance_to_center(key)
+        return score
+
+    def euclidian_distance_to_center(self, position: tuple[int, int]):
+        return ((position[0] - center[0]) ** 2 + (position[1] - center[1]) ** 2) ** 0.5
+
+    def pieces_alive(self, state, player_id):
+        score = 0
+        for key, value in state.get_rep().env.items():
+            if value.owner_id == player_id:
+                score += 10
+        return score
