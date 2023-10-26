@@ -177,6 +177,6 @@ class MyPlayer(PlayerAbalone):
         return None
 
 
-class ZobristTable():
+class ZobristTable:
     def __init__(self):
-        self.table = [[[random.randint(1, 2 ** 64 - 1) for i in range(max_line_length)] for j in range(max_line_length1)] for k in range(8)]
+        self.table = [[[random.randint(1, 2 ** 64 - 1) for i in range(max_line_length)] for j in range(max_line_length)] for k in range(8)]
