@@ -1,5 +1,6 @@
 # Authors: Émile Watier (2115718) and Lana Pham (2116078)
 import math
+import random
 
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
@@ -7,6 +8,7 @@ from seahorse.game.game_state import GameState
 
 infinity = math.inf
 center = (8, 4)
+max_line_length = 9
 
 
 class MyPlayer(PlayerAbalone):
@@ -28,6 +30,7 @@ class MyPlayer(PlayerAbalone):
         """
         super().__init__(piece_type, name, time_limit, *args)
         self.other_player = None
+        self.transposition_table = None
 
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
@@ -142,7 +145,8 @@ class MyPlayer(PlayerAbalone):
 
     def heuristic(self, state):
         score = 0
-        score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state, self.id)
+        score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
+                                                                                                                 self.id)
         score += self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
         return score
 
@@ -162,3 +166,17 @@ class MyPlayer(PlayerAbalone):
             if value.owner_id == player_id:
                 score += 10
         return score
+
+    def other_player_has_more_pieces(self, state):
+        return self.pieces_alive(state, self.other_player) > self.pieces_alive(state, self.id)
+
+    def other_player_has_as_much_pieces(self, state):
+        return self.pieces_alive(state, self.other_player) == self.pieces_alive(state, self.id)
+
+    def zobrist_hash(self):
+        return None
+
+
+class ZobristTable():
+    def __init__(self):
+        self.table = [[[random.randint(1, 2 ** 64 - 1) for i in range(max_line_length)] for j in range(max_line_length1)] for k in range(8)]
