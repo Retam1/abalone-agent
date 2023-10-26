@@ -57,17 +57,38 @@ class MyPlayer(PlayerAbalone):
         score = -infinity
         action = None
 
-        for new_action in state.get_possible_actions():
+        pieces_difference = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+
+        actions = state.get_possible_actions()
+
+        larger_difference_actions = []
+        equal_difference_actions = []
+        lesser_difference_actions = []
+        states = {}
+
+        for new_action in actions:
             new_state = new_action.get_next_game_state()
-            new_score, _ = self.min_value(new_state, alpha, beta, depth + 1)
+            states[new_action] = new_state
+            new_pieces_differences = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+            if new_pieces_differences > pieces_difference:
+                larger_difference_actions.append(new_action)
+            elif new_pieces_differences == pieces_difference:
+                equal_difference_actions.append(new_action)
+            else:
+                lesser_difference_actions.append(new_action)
 
-            if new_score > score:
-                score = new_score
-                action = new_action
-                alpha = max(alpha, score)
+        for actions in [larger_difference_actions, equal_difference_actions, lesser_difference_actions]:
+            for new_action in actions:
+                new_state = states[new_action]
+                new_score, _ = self.min_value(new_state, alpha, beta, depth + 1)
 
-            if score >= beta:
-                break
+                if new_score > score:
+                    score = new_score
+                    action = new_action
+                    alpha = max(alpha, score)
+
+                if score >= beta:
+                    break
         return score, action
 
     def min_value(self, state: GameState, alpha: float, beta: float, depth: int):
@@ -80,17 +101,38 @@ class MyPlayer(PlayerAbalone):
         score = infinity
         action = None
 
-        for new_action in state.get_possible_actions():
+        pieces_difference = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+
+        actions = state.get_possible_actions()
+
+        larger_difference_actions = []
+        equal_difference_actions = []
+        lesser_difference_actions = []
+        states = {}
+
+        for new_action in actions:
             new_state = new_action.get_next_game_state()
-            new_score, _ = self.max_value(new_state, alpha, beta, depth + 1)
+            states[new_action] = new_state
+            new_pieces_differences = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+            if new_pieces_differences > pieces_difference:
+                larger_difference_actions.append(new_action)
+            elif new_pieces_differences == pieces_difference:
+                equal_difference_actions.append(new_action)
+            else:
+                lesser_difference_actions.append(new_action)
 
-            if new_score < score:
-                score = new_score
-                action = new_action
-                beta = min(beta, score)
+        for actions in [larger_difference_actions, equal_difference_actions, lesser_difference_actions]:
+            for new_action in actions:
+                new_state = states[new_action]
+                new_score, _ = self.max_value(new_state, alpha, beta, depth + 1)
 
-            if score <= alpha:
-                break
+                if new_score < score:
+                    score = new_score
+                    action = new_action
+                    beta = min(beta, score)
+
+                if score <= alpha:
+                    break
 
         return score, action
 
