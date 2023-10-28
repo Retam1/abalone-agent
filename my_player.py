@@ -1,6 +1,7 @@
 # Authors: Émile Watier (2115718) and Lana Pham (2116078)
 import math
 import random
+from typing import List, Union
 
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
@@ -185,7 +186,7 @@ class ZobristTable:
     def __init__(self):
         self.table = [[[random.randint(1, 2 ** 64 - 1) for _ in range(max_line_length)] for _ in range(max_line_length)] for _ in range(nb_piece_colors)]
 
-    def indexing(self, piece):
+    def indexing(self, piece: Union[int, str]):
         if piece == 'W':
             return 0
         elif piece == 'B':
@@ -193,7 +194,7 @@ class ZobristTable:
         else:
             return -1
 
-    def computeHash(self, board):
+    def computeHash(self, board: List[List[Union[int, str]]]):
         key = 0
 
         for i in range(max_line_length):
