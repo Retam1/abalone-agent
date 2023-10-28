@@ -9,6 +9,7 @@ from seahorse.game.game_state import GameState
 infinity = math.inf
 center = (8, 4)
 max_line_length = 9
+nb_piece_colors = 2
 
 
 class MyPlayer(PlayerAbalone):
@@ -43,6 +44,9 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
+        [print(*x) for x in current_state.get_rep().get_grid()]
+        [print(a, b.__dict__) for a, b in current_state.get_rep().env.items()]
+
         self.other_player = next(player for player in current_state.players if player.get_id() != self.id).get_id()
         score, action = self.minimax_search(current_state)
         return action
@@ -179,4 +183,24 @@ class MyPlayer(PlayerAbalone):
 
 class ZobristTable:
     def __init__(self):
-        self.table = [[[random.randint(1, 2 ** 64 - 1) for i in range(max_line_length)] for j in range(max_line_length)] for k in range(8)]
+        self.table = [[[random.randint(1, 2 ** 64 - 1) for _ in range(max_line_length)] for _ in range(max_line_length)] for _ in range(nb_piece_colors)]
+
+    def indexing(self, piece):
+        if piece == 'W':
+            return 0
+        elif piece == 'B':
+            return 1
+        else:
+            return -1
+
+    def computeHash(self, board):
+        key = 0
+
+        for i in range(max_line_length):
+            for j in range(max_line_length):
+                if board[i][j] == 3 or board[i][j] == 0:
+                    continue
+                piece = self.indexing(board[i][j])
+                key ^= self.table[i][j][piece]
+
+        return key
