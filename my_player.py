@@ -199,7 +199,7 @@ class ZobristTable:
 
         for i in range(max_line_length):
             for j in range(max_line_length):
-                if board[i][j] == 3 or board[i][j] == 0:
+                if type(board[i][j]) == int:
                     continue
                 piece = self.indexing(board[i][j])
                 key ^= self.table[i][j][piece]
