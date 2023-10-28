@@ -32,7 +32,7 @@ class MyPlayer(PlayerAbalone):
         """
         super().__init__(piece_type, name, time_limit, *args)
         self.other_player = None
-        self.transposition_table = None
+        self.transposition_table = ZobristTable()
 
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
@@ -195,13 +195,13 @@ class ZobristTable:
             return -1
 
     def computeHash(self, board: List[List[Union[int, str]]]):
-        key = 0
+        hash = 0
 
         for i in range(max_line_length):
             for j in range(max_line_length):
                 if type(board[i][j]) == int:
                     continue
                 piece = self.indexing(board[i][j])
-                key ^= self.table[i][j][piece]
+                hash ^= self.table[i][j][piece]
 
-        return key
+        return hash
