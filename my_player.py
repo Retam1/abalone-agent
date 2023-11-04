@@ -178,9 +178,6 @@ class MyPlayer(PlayerAbalone):
     def other_player_has_as_much_pieces(self, state):
         return self.pieces_alive(state, self.other_player) == self.pieces_alive(state, self.id)
 
-    def zobrist_hash(self):
-        return None
-
 
 class ZobristTable:
     def __init__(self):
