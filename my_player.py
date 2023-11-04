@@ -184,7 +184,13 @@ class MyPlayer(PlayerAbalone):
 
 class ZobristTable:
     def __init__(self):
-        self.table = [[[random.randint(1, 2 ** (max_line_length ** 2) - 1) for _ in range(nb_piece_colors)] for _ in range(max_line_length)] for _ in range(max_line_length)]
+        self.table = [
+            [
+                [random.randint(1, 2 ** (max_line_length ** 2) - 1) for _ in range(nb_piece_colors)]
+                for _ in range(max_line_length)
+            ]
+            for _ in range(max_line_length)
+        ]
 
     def indexing(self, piece: Union[int, str]):
         if piece == 'W':
