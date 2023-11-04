@@ -197,7 +197,7 @@ class ZobristTable:
         else:
             return -1
 
-    def computeHash(self, board: List[List[Union[int, str]]]):
+    def compute_hash(self, board: List[List[Union[int, str]]]):
         hash = 0
 
         for i in range(max_line_length):
