@@ -211,10 +211,10 @@ class ZobristTable:
 
         return hash
 
-    def record(self, hash, value, decision, depth):
+    def record(self, hash, score, action, depth):
         if hash not in self.hash_table:
             self.table[hash] = {}
 
-        self.hash_table[hash]['value'] = value
-        self.hash_table[hash]['decision'] = decision
+        self.hash_table[hash]['score'] = score
+        self.hash_table[hash]['action'] = action
         self.hash_table[hash]['depth'] = depth
