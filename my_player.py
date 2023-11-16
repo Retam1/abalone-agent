@@ -53,7 +53,6 @@ class MyPlayer(PlayerAbalone):
         return action
 
     def minimax_search(self, initial_state: GameState):
-        self.transposition_table = ZobristTable()
         return self.max_value(initial_state, -infinity, infinity, 0)
 
     def max_value(self, state: GameState, alpha: float, beta: float, depth: int):
