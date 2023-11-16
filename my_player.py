@@ -29,6 +29,7 @@ class MyPlayer(PlayerAbalone):
             time_limit (float, optional): the time limit in (s)
         """
         super().__init__(piece_type, name, time_limit, *args)
+        self.number_of_actions = 0
         self.other_player = None
         self.transposition_table = None
 
@@ -45,6 +46,7 @@ class MyPlayer(PlayerAbalone):
         """
         self.other_player = next(player for player in current_state.players if player.get_id() != self.id).get_id()
         score, action = self.minimax_search(current_state)
+        self.number_of_actions += 1
         return action
 
     def minimax_search(self, initial_state: GameState):
@@ -60,38 +62,19 @@ class MyPlayer(PlayerAbalone):
         score = -infinity
         action = None
 
-        pieces_difference = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
-
-        actions = state.get_possible_actions()
-
-        larger_difference_actions = []
-        equal_difference_actions = []
-        lesser_difference_actions = []
-        states = {}
+        actions = state.get_possible_actions() if self.number_of_actions <= 5 else self.get_sorted_actions(state)
 
         for new_action in actions:
             new_state = new_action.get_next_game_state()
-            states[new_action] = new_state
-            new_pieces_differences = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
-            if new_pieces_differences > pieces_difference:
-                larger_difference_actions.append(new_action)
-            elif new_pieces_differences == pieces_difference:
-                equal_difference_actions.append(new_action)
-            else:
-                lesser_difference_actions.append(new_action)
+            new_score, _ = self.min_value(new_state, alpha, beta, depth + 1)
 
-        for actions in [larger_difference_actions, equal_difference_actions, lesser_difference_actions]:
-            for new_action in actions:
-                new_state = states[new_action]
-                new_score, _ = self.min_value(new_state, alpha, beta, depth + 1)
+            if new_score > score:
+                score = new_score
+                action = new_action
+                alpha = max(alpha, score)
 
-                if new_score > score:
-                    score = new_score
-                    action = new_action
-                    alpha = max(alpha, score)
-
-                if score >= beta:
-                    break
+            if score >= beta:
+                break
         return score, action
 
     def min_value(self, state: GameState, alpha: float, beta: float, depth: int):
@@ -104,6 +87,23 @@ class MyPlayer(PlayerAbalone):
         score = infinity
         action = None
 
+        actions = state.get_possible_actions() if self.number_of_actions <= 5 else self.get_sorted_actions(state)
+
+        for new_action in actions:
+            new_state = new_action.get_next_game_state()
+            new_score, _ = self.max_value(new_state, alpha, beta, depth + 1)
+
+            if new_score < score:
+                score = new_score
+                action = new_action
+                beta = min(beta, score)
+
+            if score <= alpha:
+                break
+
+        return score, action
+
+    def get_sorted_actions(self, state: GameState):
         pieces_difference = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
 
         actions = state.get_possible_actions()
@@ -111,11 +111,8 @@ class MyPlayer(PlayerAbalone):
         larger_difference_actions = []
         equal_difference_actions = []
         lesser_difference_actions = []
-        states = {}
 
         for new_action in actions:
-            new_state = new_action.get_next_game_state()
-            states[new_action] = new_state
             new_pieces_differences = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
             if new_pieces_differences > pieces_difference:
                 larger_difference_actions.append(new_action)
@@ -123,21 +120,7 @@ class MyPlayer(PlayerAbalone):
                 equal_difference_actions.append(new_action)
             else:
                 lesser_difference_actions.append(new_action)
-
-        for actions in [larger_difference_actions, equal_difference_actions, lesser_difference_actions]:
-            for new_action in actions:
-                new_state = states[new_action]
-                new_score, _ = self.max_value(new_state, alpha, beta, depth + 1)
-
-                if new_score < score:
-                    score = new_score
-                    action = new_action
-                    beta = min(beta, score)
-
-                if score <= alpha:
-                    break
-
-        return score, action
+        return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
     def cutoff_depth(self, depth):
         # TODO : déterminer un depth
