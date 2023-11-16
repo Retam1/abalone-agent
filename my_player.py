@@ -212,4 +212,4 @@ class ZobristTable:
         self.hash_table[hash]['depth'] = depth
 
     def to_json(self):
-        return {i:j for i,j in self.__dict__.items()}
+        return {}
