@@ -46,8 +46,6 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
-        [print(*x) for x in current_state.get_rep().get_grid()]
-        [print(a, b.__dict__) for a, b in current_state.get_rep().env.items()]
 
         self.other_player = next(player for player in current_state.players if player.get_id() != self.id).get_id()
         score, action = self.minimax_search(current_state)
@@ -207,8 +205,11 @@ class ZobristTable:
 
     def record(self, hash, score, action, depth):
         if hash not in self.hash_table:
-            self.table[hash] = {}
+            self.hash_table[hash] = {}
 
         self.hash_table[hash]['score'] = score
         self.hash_table[hash]['action'] = action
         self.hash_table[hash]['depth'] = depth
+
+    def to_json(self):
+        return {i:j for i,j in self.__dict__.items()}
