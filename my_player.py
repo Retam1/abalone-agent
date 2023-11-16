@@ -33,7 +33,7 @@ class MyPlayer(PlayerAbalone):
         super().__init__(piece_type, name, time_limit, *args)
         self.number_of_actions = 0
         self.other_player = None
-        self.transposition_table = ZobristTable()
+        self.transposition_table = TranspositionTable()
 
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
@@ -172,10 +172,10 @@ class MyPlayer(PlayerAbalone):
         return self.pieces_alive(state, self.other_player) == self.pieces_alive(state, self.id)
 
 
-class ZobristTable:
+class TranspositionTable:
     def __init__(self):
         self.hash_table = {}
-        self.table = [
+        self.zobrist_hash_keys = [
             [
                 [random.randint(1, 2 ** (max_line_length ** 2) - 1) for _ in range(nb_piece_colors)]
                 for _ in range(max_line_length)
@@ -199,7 +199,7 @@ class ZobristTable:
                 if type(board[i][j]) == int:
                     continue
                 piece = self.indexing(board[i][j])
-                hash ^= self.table[i][j][piece]
+                hash ^= self.zobrist_hash_keys[i][j][piece]
 
         return hash
 
