@@ -182,6 +182,7 @@ class MyPlayer(PlayerAbalone):
 
 class ZobristTable:
     def __init__(self):
+        self.hash_table = {}
         self.table = [
             [
                 [random.randint(1, 2 ** (max_line_length ** 2) - 1) for _ in range(nb_piece_colors)]
