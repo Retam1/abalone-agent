@@ -124,7 +124,7 @@ class MyPlayer(PlayerAbalone):
 
     def cutoff_depth(self, depth):
         # TODO : déterminer un depth
-        return depth >= 3
+        return depth > 2
 
     def heuristic(self, state):
         score = 0
