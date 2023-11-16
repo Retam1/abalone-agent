@@ -1,6 +1,7 @@
 # Authors: Émile Watier (2115718) and Lana Pham (2116078)
 import math
 import random
+from typing import List, Union
 
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
@@ -9,6 +10,7 @@ from seahorse.game.game_state import GameState
 infinity = math.inf
 center = (8, 4)
 max_line_length = 9
+nb_piece_colors = 2
 
 
 class MyPlayer(PlayerAbalone):
@@ -31,7 +33,7 @@ class MyPlayer(PlayerAbalone):
         super().__init__(piece_type, name, time_limit, *args)
         self.number_of_actions = 0
         self.other_player = None
-        self.transposition_table = None
+        self.transposition_table = ZobristTable()
 
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
         """
@@ -44,12 +46,16 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
+        [print(*x) for x in current_state.get_rep().get_grid()]
+        [print(a, b.__dict__) for a, b in current_state.get_rep().env.items()]
+
         self.other_player = next(player for player in current_state.players if player.get_id() != self.id).get_id()
         score, action = self.minimax_search(current_state)
         self.number_of_actions += 1
         return action
 
     def minimax_search(self, initial_state: GameState):
+        self.transposition_table = ZobristTable()
         return self.max_value(initial_state, -infinity, infinity, 0)
 
     def max_value(self, state: GameState, alpha: float, beta: float, depth: int):
@@ -58,6 +64,10 @@ class MyPlayer(PlayerAbalone):
 
         if self.cutoff_depth(depth):
             return self.heuristic(state), None
+
+        if hash := self.transposition_table.compute_hash(state.get_rep().get_grid()) in self.transposition_table.hash_table and \
+            self.transposition_table.hash_table[hash]['depth'] <= depth:
+            return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash]['action']
 
         score = -infinity
         action = None
@@ -75,6 +85,8 @@ class MyPlayer(PlayerAbalone):
 
             if score >= beta:
                 break
+
+        self.transposition_table.record(hash, score, action, depth)
         return score, action
 
     def min_value(self, state: GameState, alpha: float, beta: float, depth: int):
@@ -83,6 +95,10 @@ class MyPlayer(PlayerAbalone):
 
         if self.cutoff_depth(depth):
             return self.heuristic(state), None
+
+        if (hash := self.transposition_table.compute_hash(state.get_rep().get_grid()) in self.transposition_table.hash_table) and \
+            self.transposition_table.hash_table[hash]['depth'] <= depth:
+            return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash]['action']
 
         score = infinity
         action = None
@@ -100,7 +116,8 @@ class MyPlayer(PlayerAbalone):
 
             if score <= alpha:
                 break
-
+            
+        self.transposition_table.record(hash, score, action,depth)
         return score, action
 
     def get_sorted_actions(self, state: GameState):
@@ -156,10 +173,42 @@ class MyPlayer(PlayerAbalone):
     def other_player_has_as_much_pieces(self, state):
         return self.pieces_alive(state, self.other_player) == self.pieces_alive(state, self.id)
 
-    def zobrist_hash(self):
-        return None
-
 
 class ZobristTable:
     def __init__(self):
-        self.table = [[[random.randint(1, 2 ** 64 - 1) for i in range(max_line_length)] for j in range(max_line_length)] for k in range(8)]
+        self.hash_table = {}
+        self.table = [
+            [
+                [random.randint(1, 2 ** (max_line_length ** 2) - 1) for _ in range(nb_piece_colors)]
+                for _ in range(max_line_length)
+            ]
+            for _ in range(max_line_length)
+        ]
+
+    def indexing(self, piece: Union[int, str]):
+        if piece == 'W':
+            return 0
+        elif piece == 'B':
+            return 1
+        else:
+            return -1
+
+    def compute_hash(self, board: List[List[Union[int, str]]]):
+        hash = 0
+
+        for i in range(max_line_length):
+            for j in range(max_line_length):
+                if type(board[i][j]) == int:
+                    continue
+                piece = self.indexing(board[i][j])
+                hash ^= self.table[i][j][piece]
+
+        return hash
+
+    def record(self, hash, score, action, depth):
+        if hash not in self.hash_table:
+            self.table[hash] = {}
+
+        self.hash_table[hash]['score'] = score
+        self.hash_table[hash]['action'] = action
+        self.hash_table[hash]['depth'] = depth
