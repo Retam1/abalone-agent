@@ -62,8 +62,8 @@ class MyPlayer(PlayerAbalone):
         if self.cutoff_depth(depth):
             return self.heuristic(state), None
 
-        if hash := self.transposition_table.compute_hash(state.get_rep().get_grid()) in self.transposition_table.hash_table and \
-            self.transposition_table.hash_table[hash]['depth'] <= depth:
+        hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
+        if hash in self.transposition_table.hash_table:
             return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash]['action']
 
         score = -infinity
@@ -93,8 +93,9 @@ class MyPlayer(PlayerAbalone):
         if self.cutoff_depth(depth):
             return self.heuristic(state), None
 
-        if (hash := self.transposition_table.compute_hash(state.get_rep().get_grid()) in self.transposition_table.hash_table) and \
-            self.transposition_table.hash_table[hash]['depth'] <= depth:
+
+        hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
+        if hash in self.transposition_table.hash_table:
             return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash]['action']
 
         score = infinity
@@ -114,7 +115,7 @@ class MyPlayer(PlayerAbalone):
             if score <= alpha:
                 break
             
-        self.transposition_table.record(hash, score, action,depth)
+        self.transposition_table.record(hash, score, action, depth)
         return score, action
 
     def get_sorted_actions(self, state: GameState):
