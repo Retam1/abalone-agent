@@ -11,6 +11,7 @@ infinity = math.inf
 center = (8, 4)
 max_line_length = 9
 nb_piece_colors = 2
+around_coordinates_differences = [(-1, -1), (-2, 0), (-1, 1), (1, 1), (2, 0), (1, -1)]
 
 
 class MyPlayer(PlayerAbalone):
@@ -146,6 +147,7 @@ class MyPlayer(PlayerAbalone):
         score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
                                                                                                                  self.id)
         score += self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+        score += (self.pieces_together_heuristic(state, self.id) - self.pieces_together_heuristic(state, self.other_player))
         return score
 
     def distance_to_center_heuristic(self, state: GameState, player_id: int):
@@ -154,6 +156,15 @@ class MyPlayer(PlayerAbalone):
             if value.owner_id == player_id:
                 score += self.euclidian_distance_to_center(key)
         return score
+
+    def pieces_together_heuristic(self, state: GameState, player_id: int):
+        number_of_pieces_around = 0
+        for key, value in state.get_rep().env.items():
+            if value.owner_id == player_id:
+                for coordinate_difference in around_coordinates_differences:
+                    if (piece := state.get_rep().env.get(tuple(x - y for x, y in zip(key, coordinate_difference)))) and piece.owner_id == player_id:
+                        number_of_pieces_around += 1
+        return number_of_pieces_around
 
     def euclidian_distance_to_center(self, position: tuple[int, int]):
         return self.euclidian_distance(position, center)
