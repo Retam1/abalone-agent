@@ -156,7 +156,10 @@ class MyPlayer(PlayerAbalone):
         return score
 
     def euclidian_distance_to_center(self, position: tuple[int, int]):
-        return ((position[0] - center[0]) ** 2 + (position[1] - center[1]) ** 2) ** 0.5
+        return self.euclidian_distance(position, center)
+
+    def euclidian_distance(self, position1: tuple[int, int], position2: tuple[int, int]):
+        return ((position1[0] - position2[0]) ** 2 + (position1[1] - position2[1]) ** 2) ** 0.5
 
     def pieces_alive(self, state, player_id):
         score = 0
