@@ -7,6 +7,7 @@ from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
 
+cutoff_depth = 2
 infinity = math.inf
 center = (8, 4)
 max_line_length = 9
@@ -144,7 +145,7 @@ class MyPlayer(PlayerAbalone):
 
     def cutoff_depth(self, current_depth):
         # TODO : déterminer un depth
-        if 25 - self.number_of_actions <= cutoff_depth:
+        if 25 - self.number_of_actions < cutoff_depth:
             return current_depth > 25 - self.number_of_actions
         return current_depth > cutoff_depth
 
