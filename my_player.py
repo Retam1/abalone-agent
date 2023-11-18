@@ -156,9 +156,9 @@ class MyPlayer(PlayerAbalone):
 
     def distance_to_center_heuristic(self, state: GameStateAbalone, piece_type: str):
         score = 0
-        for key, value in state.get_rep().env.items():
-            if value.piece_type == piece_type:
-                score += self.euclidian_distance_to_center(key)
+        for coordinate, piece in state.get_rep().env.items():
+            if piece.piece_type == piece_type:
+                score += self.euclidian_distance_to_center(coordinate)
         return score
 
     def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
