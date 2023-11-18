@@ -158,7 +158,7 @@ class MyPlayer(PlayerAbalone):
         score = 0
         for coordinate, piece in state.get_rep().env.items():
             if piece.piece_type == piece_type:
-                score += self.euclidian_distance_to_center(coordinate)
+                score += self.euclidian_distance(coordinate, CENTER)
         return score
 
     def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
@@ -196,9 +196,6 @@ class MyPlayer(PlayerAbalone):
 
     def calculate_neighbor_coordinate(self, coordinate: tuple[int, int], difference: tuple[int, int]):
         return coordinate[0] + difference[0], coordinate[1] + difference[1]
-
-    def euclidian_distance_to_center(self, position: tuple[int, int]):
-        return self.euclidian_distance(position, CENTER)
 
     def euclidian_distance(self, position1: tuple[int, int], position2: tuple[int, int]):
         return ((position1[0] - position2[0]) ** 2 + (position1[1] - position2[1]) ** 2) ** 0.5
