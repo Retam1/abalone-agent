@@ -156,6 +156,28 @@ class MyPlayer(PlayerAbalone):
                 score += self.euclidian_distance_to_center(key)
         return score
 
+    def pieces_in_a_row_heuristic(self, state: GameState, player_id: int):
+        score = 0
+        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.owner_id == player_id}
+
+        for coordinate in coordinates:
+            for coordinate_in_same_row in coordinates_in_same_row:
+                coordinates_to_check = self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[0]), \
+                                        self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[1])
+                outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0], coordinate_in_same_row[0]), \
+                                        self.calculate_neighbor_coordinate(coordinates_to_check[1], coordinate_in_same_row[1])
+                if outer_coordinates_to_check[0] in coordinates or outer_coordinates_to_check[1] in coordinates:
+                    continue
+
+                if coordinates_to_check[0] in coordinates and coordinates_to_check[1] in coordinates:
+                    score += 2
+
+                elif (coordinates_to_check[0] in coordinates and coordinates_to_check[1] not in coordinates) or \
+                    (coordinates_to_check[0] not in coordinates and coordinates_to_check[1] in coordinates):
+                    score += 0.5
+
+        return score
+
     def calculate_neighbor_coordinate(self, coordinate: tuple[int, int], difference: tuple[int, int]):
         return coordinate[0] + difference[0], coordinate[1] + difference[1]
 
