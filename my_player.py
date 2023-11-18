@@ -177,14 +177,14 @@ class MyPlayer(PlayerAbalone):
         coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
 
         for coordinate in coordinates:
-            for coordinate_in_same_row in COORDINATES_IN_SAME_ROW:
-                coordinates_to_check = self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[0]), \
-                                        self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[1])
+            for row_coordinates in COORDINATES_IN_SAME_ROW:
+                coordinates_to_check = self.calculate_neighbor_coordinate(coordinate, row_coordinates[0]), \
+                                        self.calculate_neighbor_coordinate(coordinate, row_coordinates[1])
 
                 if coordinates_to_check[0] in coordinates and coordinates_to_check[1] in coordinates:
                     score += 2
-                    outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0], coordinate_in_same_row[0]), \
-                                            self.calculate_neighbor_coordinate(coordinates_to_check[1], coordinate_in_same_row[1])
+                    outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0], row_coordinates[0]), \
+                                            self.calculate_neighbor_coordinate(coordinates_to_check[1], row_coordinates[1])
 
                     if outer_coordinates_to_check[0] in coordinates or outer_coordinates_to_check[1] in coordinates:
                         score -= 2
