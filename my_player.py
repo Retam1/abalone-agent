@@ -153,7 +153,7 @@ class MyPlayer(PlayerAbalone):
         score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
                                                                                                                  self.piece_type)
         score += (self.pieces_alive(state, self.piece_type) - self.pieces_alive(state, self.other_player)) * 1000
-        score += (self.pieces_together_heuristic(state, self.piece_type) - self.pieces_together_heuristic(state,
+        score += (self.pieces_in_a_row_heuristic(state, self.piece_type) - self.pieces_in_a_row_heuristic(state,
                                                                                                   self.other_player))
         return score
 
@@ -164,32 +164,30 @@ class MyPlayer(PlayerAbalone):
                 score += self.euclidian_distance_to_center(key)
         return score
 
-    def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
+    def pieces_in_a_row_heuristic(self, state: GameStateAbalone, piece_type: str):
         score = 0
-        for key, value in state.get_rep().env.items():
-            if value.piece_type == piece_type:
-                for row_coordinates in coordinates_in_same_row:
-                    piece1 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, row_coordinates[0])))
-                    piece2 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, row_coordinates[1])))
+        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
 
-                    player_is_piece1_owner = piece1 and piece1.piece_type == piece_type
-                    player_is_piece2_owner = piece2 and piece2.piece_type == piece_type
-                    if player_is_piece1_owner and player_is_piece2_owner:
-                        score += 2
-                        piece3 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, overflow_coordinates.get(row_coordinates[0]))))
-                        piece4 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, overflow_coordinates.get(row_coordinates[1]))))
+        for coordinate in coordinates:
+            for coordinate_in_same_row in coordinates_in_same_row:
+                coordinates_to_check = self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[0]), \
+                                        self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[1])
 
-                        player_is_piece3_owner = piece3 and piece3.piece_type == piece_type
-                        player_is_piece4_owner = piece4 and piece4.piece_type == piece_type
-                        if player_is_piece3_owner:
-                            score -= 1
-                        if player_is_piece4_owner:
-                            score -= 1
+                if coordinates_to_check[0] in coordinates and coordinates_to_check[1] in coordinates:
+                    score += 2
+                    outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0], coordinate_in_same_row[0]), \
+                                            self.calculate_neighbor_coordinate(coordinates_to_check[1], coordinate_in_same_row[1])
 
-                    elif player_is_piece1_owner or player_is_piece2_owner:
-                        score += 1
+                    if outer_coordinates_to_check[0] in coordinates or outer_coordinates_to_check[1] in coordinates:
+                        score -= 2
+
+                elif coordinates_to_check[0] in coordinates or coordinates_to_check[1] in coordinates:
+                    score += 0.5
 
         return score
+
+    def calculate_neighbor_coordinate(self, coordinate: tuple[int, int], difference: tuple[int, int]):
+        return coordinate[0] + difference[0], coordinate[1] + difference[1]
 
     def euclidian_distance_to_center(self, position: tuple[int, int]):
         return self.euclidian_distance(position, center)
