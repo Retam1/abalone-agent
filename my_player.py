@@ -210,12 +210,6 @@ class MyPlayer(PlayerAbalone):
                 score += 10
         return score
 
-    def other_player_has_more_pieces(self, state):
-        return self.pieces_alive(state, self.other_player) > self.pieces_alive(state, self.id)
-
-    def other_player_has_as_much_pieces(self, state):
-        return self.pieces_alive(state, self.other_player) == self.pieces_alive(state, self.id)
-
 
 class TranspositionTable:
     def __init__(self):
