@@ -160,7 +160,7 @@ class MyPlayer(PlayerAbalone):
 
     def pieces_in_a_row_heuristic(self, state: GameState, player_id: int):
         score = 0
-        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.owner_id == player_id}
+        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == self.get_piece_type()}
 
         for coordinate in coordinates:
             for coordinate_in_same_row in coordinates_in_same_row:
