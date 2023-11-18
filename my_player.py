@@ -47,10 +47,12 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
-
+        # [print(*x) for x in current_state.get_rep().get_grid()]
+        # [print(a, b.__dict__) for a, b in current_state.get_rep().env.items()]
         self.other_player = next(player for player in current_state.players if player.get_id() != self.id).get_id()
         score, action = self.minimax_search(current_state)
         self.number_of_actions += 1
+        # print('Score : ', self.pieces_in_a_row_heuristic(action.next_game_state, self.id))
         return action
 
     def minimax_search(self, initial_state: GameState):
@@ -147,7 +149,7 @@ class MyPlayer(PlayerAbalone):
         score = 0
         score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
                                                                                                                  self.id)
-        score += self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+        score += (self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player))*100
         score += self.pieces_in_a_row_heuristic(state, self.id) - self.pieces_in_a_row_heuristic(state, self.other_player)
 
         return score
@@ -167,16 +169,16 @@ class MyPlayer(PlayerAbalone):
             for coordinate_in_same_row in coordinates_in_same_row:
                 coordinates_to_check = self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[0]), \
                                         self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[1])
-                outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0], coordinate_in_same_row[0]), \
-                                        self.calculate_neighbor_coordinate(coordinates_to_check[1], coordinate_in_same_row[1])
-                if outer_coordinates_to_check[0] in coordinates or outer_coordinates_to_check[1] in coordinates:
-                    continue
 
                 if coordinates_to_check[0] in coordinates and coordinates_to_check[1] in coordinates:
                     score += 2
+                    outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0], coordinate_in_same_row[0]), \
+                                            self.calculate_neighbor_coordinate(coordinates_to_check[1], coordinate_in_same_row[1])
 
-                elif (coordinates_to_check[0] in coordinates and coordinates_to_check[1] not in coordinates) or \
-                    (coordinates_to_check[0] not in coordinates and coordinates_to_check[1] in coordinates):
+                    if outer_coordinates_to_check[0] in coordinates or outer_coordinates_to_check[1] in coordinates:
+                        score -= 2
+
+                elif coordinates_to_check[0] in coordinates or coordinates_to_check[1] in coordinates:
                     score += 0.5
 
         return score
