@@ -11,7 +11,9 @@ infinity = math.inf
 center = (8, 4)
 max_line_length = 9
 nb_piece_colors = 2
-around_coordinates_differences = [(-1, -1), (-2, 0), (-1, 1), (1, 1), (2, 0), (1, -1)]
+coordinates_in_same_row = [((-1, -1), (1, 1)), ((-2, 0), (2, 0)), ((-1, 1), (1, -1))]
+overflow_coordinates = {(-1, -1): (-2, -2), (-2, 0): (-4, 0), (-1, 1): (-2, 2), (1, 1): (2, 2), (2, 0): (4, 0),
+                        (1, -1): (2, -2)}
 
 
 class MyPlayer(PlayerAbalone):
@@ -33,7 +35,7 @@ class MyPlayer(PlayerAbalone):
         """
         super().__init__(piece_type, name, time_limit, *args)
         self.number_of_actions = 0
-        self.other_player = None
+        self.other_player = 'W' if self.get_piece_type() == 'B' else 'B'
         self.transposition_table = TranspositionTable()
 
     def compute_action(self, current_state: GameState, **kwargs) -> Action:
@@ -48,7 +50,6 @@ class MyPlayer(PlayerAbalone):
             Action: selected feasible action
         """
 
-        self.other_player = next(player for player in current_state.players if player.get_id() != self.id).get_id()
         score, action = self.minimax_search(current_state)
         self.number_of_actions += 1
         return action
@@ -129,7 +130,9 @@ class MyPlayer(PlayerAbalone):
         lesser_difference_actions = []
 
         for new_action in actions:
-            new_pieces_differences = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
+            new_state = new_action.current_game_state
+            new_pieces_differences = self.pieces_alive(new_state, self.id) - self.pieces_alive(new_state,
+                                                                                               self.other_player)
             if new_pieces_differences > pieces_difference:
                 larger_difference_actions.append(new_action)
             elif new_pieces_differences == pieces_difference:
@@ -140,31 +143,53 @@ class MyPlayer(PlayerAbalone):
 
     def cutoff_depth(self, depth):
         # TODO : déterminer un depth
-        return depth > 2
+        if self.number_of_actions <= 15:
+            return depth > 2
+        else:
+            return depth > 2
 
     def heuristic(self, state):
         score = 0
         score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
-                                                                                                                 self.id)
-        score += self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
-        score += (self.pieces_together_heuristic(state, self.id) - self.pieces_together_heuristic(state, self.other_player))
+                                                                                                                 self.piece_type)
+        score += (self.pieces_alive(state, self.piece_type) - self.pieces_alive(state, self.other_player)) * 1000
+        score += (self.pieces_together_heuristic(state, self.piece_type) - self.pieces_together_heuristic(state,
+                                                                                                  self.other_player))
         return score
 
-    def distance_to_center_heuristic(self, state: GameState, player_id: int):
+    def distance_to_center_heuristic(self, state: GameState, piece_type: str):
         score = 0
         for key, value in state.get_rep().env.items():
-            if value.owner_id == player_id:
+            if value.piece_type == piece_type:
                 score += self.euclidian_distance_to_center(key)
         return score
 
-    def pieces_together_heuristic(self, state: GameState, player_id: int):
-        number_of_pieces_around = 0
+    def pieces_together_heuristic(self, state: GameState, piece_type: str):
+        score = 0
         for key, value in state.get_rep().env.items():
-            if value.owner_id == player_id:
-                for coordinate_difference in around_coordinates_differences:
-                    if (piece := state.get_rep().env.get(tuple(x - y for x, y in zip(key, coordinate_difference)))) and piece.owner_id == player_id:
-                        number_of_pieces_around += 1
-        return number_of_pieces_around
+            if value.piece_type == piece_type:
+                for row_coordinates in coordinates_in_same_row:
+                    piece1 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, row_coordinates[0])))
+                    piece2 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, row_coordinates[1])))
+
+                    player_is_piece1_owner = piece1 and piece1.piece_type == piece_type
+                    player_is_piece2_owner = piece2 and piece2.piece_type == piece_type
+                    if player_is_piece1_owner and player_is_piece2_owner:
+                        score += 2
+                        piece3 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, overflow_coordinates.get(row_coordinates[0]))))
+                        piece4 = state.get_rep().env.get(tuple(x - y for x, y in zip(key, overflow_coordinates.get(row_coordinates[1]))))
+
+                        player_is_piece3_owner = piece3 and piece3.piece_type == piece_type
+                        player_is_piece4_owner = piece4 and piece4.piece_type == piece_type
+                        if player_is_piece3_owner:
+                            score -= 1
+                        if player_is_piece4_owner:
+                            score -= 1
+
+                    elif player_is_piece1_owner or player_is_piece2_owner:
+                        score += 1
+
+        return score
 
     def euclidian_distance_to_center(self, position: tuple[int, int]):
         return self.euclidian_distance(position, center)
@@ -172,10 +197,10 @@ class MyPlayer(PlayerAbalone):
     def euclidian_distance(self, position1: tuple[int, int], position2: tuple[int, int]):
         return ((position1[0] - position2[0]) ** 2 + (position1[1] - position2[1]) ** 2) ** 0.5
 
-    def pieces_alive(self, state, player_id):
+    def pieces_alive(self, state, piece_type):
         score = 0
         for key, value in state.get_rep().env.items():
-            if value.owner_id == player_id:
+            if value.piece_type == piece_type:
                 score += 10
         return score
 
