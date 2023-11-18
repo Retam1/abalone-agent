@@ -13,8 +13,6 @@ center = (8, 4)
 max_line_length = 9
 nb_piece_colors = 2
 coordinates_in_same_row = [((-1, -1), (1, 1)), ((-2, 0), (2, 0)), ((-1, 1), (1, -1))]
-overflow_coordinates = {(-1, -1): (-2, -2), (-2, 0): (-4, 0), (-1, 1): (-2, 2), (1, 1): (2, 2), (2, 0): (4, 0),
-                        (1, -1): (2, -2)}
 
 
 class MyPlayer(PlayerAbalone):
@@ -169,10 +167,10 @@ class MyPlayer(PlayerAbalone):
         number_of_pieces_around = 0
         coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
 
-        for key, value in coordinates:
-            for coordinate_in_same_row in coordinates_in_same_row:
-                for coordinate_difference in coordinate_in_same_row:
-                    if (piece := state.get_rep().env.get(self.calculate_neighbor_coordinate(key, coordinate_difference))) and piece.piece_type == piece_type:
+        for coordinate in coordinates:
+            for row_coordinates in coordinates_in_same_row:
+                for coordinate_difference in row_coordinates:
+                    if (piece := state.get_rep().env.get(self.calculate_neighbor_coordinate(coordinate, coordinate_difference))) and piece.piece_type == piece_type:
                         number_of_pieces_around += 1
         return number_of_pieces_around
 
