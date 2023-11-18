@@ -7,12 +7,12 @@ from game_state_abalone import GameStateAbalone
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
 
-cutoff_depth = 2
-infinity = math.inf
-center = (8, 4)
-max_line_length = 9
-nb_piece_colors = 2
-coordinates_in_same_row = [((-1, -1), (1, 1)), ((-2, 0), (2, 0)), ((-1, 1), (1, -1))]
+CUTOFF_DEPTH = 2
+INFINITY = math.inf
+CENTER = (8, 4)
+MAX_LINE_LENGTH = 9
+NB_PIECE_COLORS = 2
+COORDINATES_IN_SAME_ROW = [((-1, -1), (1, 1)), ((-2, 0), (2, 0)), ((-1, 1), (1, -1))]
 
 
 class MyPlayer(PlayerAbalone):
@@ -53,7 +53,7 @@ class MyPlayer(PlayerAbalone):
         return action
 
     def minimax_search(self, initial_state: GameStateAbalone):
-        return self.max_value(initial_state, -infinity, infinity, 0)
+        return self.max_value(initial_state, -INFINITY, INFINITY, 0)
 
     def max_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int):
         if state.is_done():
@@ -67,7 +67,7 @@ class MyPlayer(PlayerAbalone):
             return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash][
                 'action']
 
-        score = -infinity
+        score = -INFINITY
         action = None
 
         actions = state.get_possible_actions() if state.step <= 10 else self.get_sorted_actions(state)
@@ -99,7 +99,7 @@ class MyPlayer(PlayerAbalone):
             return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash][
                 'action']
 
-        score = infinity
+        score = INFINITY
         action = None
 
         actions = state.get_possible_actions() if state.get_step() <= 5 else self.get_sorted_actions(state)
@@ -142,7 +142,7 @@ class MyPlayer(PlayerAbalone):
 
     def cutoff_depth(self, current_depth: int):
         # TODO : déterminer un depth
-        return current_depth > cutoff_depth
+        return current_depth > CUTOFF_DEPTH
 
     def heuristic(self, state: GameStateAbalone):
         score = 0
@@ -166,7 +166,7 @@ class MyPlayer(PlayerAbalone):
         coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
 
         for coordinate in coordinates:
-            for row_coordinates in coordinates_in_same_row:
+            for row_coordinates in COORDINATES_IN_SAME_ROW:
                 for coordinate_difference in row_coordinates:
                     if (piece := state.get_rep().env.get(self.calculate_neighbor_coordinate(coordinate, coordinate_difference))) and piece.piece_type == piece_type:
                         number_of_pieces_around += 1
@@ -177,7 +177,7 @@ class MyPlayer(PlayerAbalone):
         coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
 
         for coordinate in coordinates:
-            for coordinate_in_same_row in coordinates_in_same_row:
+            for coordinate_in_same_row in COORDINATES_IN_SAME_ROW:
                 coordinates_to_check = self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[0]), \
                                         self.calculate_neighbor_coordinate(coordinate, coordinate_in_same_row[1])
 
@@ -198,7 +198,7 @@ class MyPlayer(PlayerAbalone):
         return coordinate[0] + difference[0], coordinate[1] + difference[1]
 
     def euclidian_distance_to_center(self, position: tuple[int, int]):
-        return self.euclidian_distance(position, center)
+        return self.euclidian_distance(position, CENTER)
 
     def euclidian_distance(self, position1: tuple[int, int], position2: tuple[int, int]):
         return ((position1[0] - position2[0]) ** 2 + (position1[1] - position2[1]) ** 2) ** 0.5
@@ -216,10 +216,10 @@ class TranspositionTable:
         self.hash_table = {}
         self.zobrist_hash_keys = [
             [
-                [random.randint(1, 2 ** (max_line_length ** 2) - 1) for _ in range(nb_piece_colors)]
-                for _ in range(max_line_length)
+                [random.randint(1, 2 ** (MAX_LINE_LENGTH ** 2) - 1) for _ in range(NB_PIECE_COLORS)]
+                for _ in range(MAX_LINE_LENGTH)
             ]
-            for _ in range(max_line_length)
+            for _ in range(MAX_LINE_LENGTH)
         ]
 
     def indexing(self, piece: Union[int, str]):
@@ -233,8 +233,8 @@ class TranspositionTable:
     def compute_hash(self, board: List[List[Union[int, str]]]):
         hash = 0
 
-        for i in range(max_line_length):
-            for j in range(max_line_length):
+        for i in range(MAX_LINE_LENGTH):
+            for j in range(MAX_LINE_LENGTH):
                 if type(board[i][j]) == int:
                     continue
                 piece = self.indexing(board[i][j])
