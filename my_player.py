@@ -3,9 +3,9 @@ import math
 import random
 from typing import List, Union
 
+from game_state_abalone import GameStateAbalone
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
-from seahorse.game.game_state import GameState
 
 cutoff_depth = 2
 infinity = math.inf
@@ -35,11 +35,10 @@ class MyPlayer(PlayerAbalone):
             time_limit (float, optional): the time limit in (s)
         """
         super().__init__(piece_type, name, time_limit, *args)
-        self.number_of_actions = 0
         self.other_player = 'W' if self.get_piece_type() == 'B' else 'B'
         self.transposition_table = TranspositionTable()
 
-    def compute_action(self, current_state: GameState, **kwargs) -> Action:
+    def compute_action(self, current_state: GameStateAbalone, **kwargs) -> Action:
         """
         Function to implement the logic of the player.
 
@@ -52,17 +51,17 @@ class MyPlayer(PlayerAbalone):
         """
 
         score, action = self.minimax_search(current_state)
-        self.number_of_actions += 1
+
         return action
 
-    def minimax_search(self, initial_state: GameState):
+    def minimax_search(self, initial_state: GameStateAbalone):
         return self.max_value(initial_state, -infinity, infinity, 0)
 
-    def max_value(self, state: GameState, alpha: float, beta: float, depth: int):
+    def max_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        if self.cutoff_depth(depth):
+        if self.cutoff_depth(depth, state):
             return self.heuristic(state), None
 
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
@@ -73,7 +72,7 @@ class MyPlayer(PlayerAbalone):
         score = -infinity
         action = None
 
-        actions = state.get_possible_actions() if self.number_of_actions <= 5 else self.get_sorted_actions(state)
+        actions = state.get_possible_actions() if state.step <= 10 else self.get_sorted_actions(state)
 
         for new_action in actions:
             new_state = new_action.get_next_game_state()
@@ -90,11 +89,11 @@ class MyPlayer(PlayerAbalone):
         self.transposition_table.record(hash, score, action, depth)
         return score, action
 
-    def min_value(self, state: GameState, alpha: float, beta: float, depth: int):
+    def min_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        if self.cutoff_depth(depth):
+        if self.cutoff_depth(depth, state):
             return self.heuristic(state), None
 
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
@@ -105,7 +104,7 @@ class MyPlayer(PlayerAbalone):
         score = infinity
         action = None
 
-        actions = state.get_possible_actions() if self.number_of_actions <= 5 else self.get_sorted_actions(state)
+        actions = state.get_possible_actions() if state.get_step() <= 5 else self.get_sorted_actions(state)
 
         for new_action in actions:
             new_state = new_action.get_next_game_state()
@@ -122,7 +121,7 @@ class MyPlayer(PlayerAbalone):
         self.transposition_table.record(hash, score, action, depth)
         return score, action
 
-    def get_sorted_actions(self, state: GameState):
+    def get_sorted_actions(self, state: GameStateAbalone):
         pieces_difference = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
 
         actions = state.get_possible_actions()
@@ -143,10 +142,10 @@ class MyPlayer(PlayerAbalone):
                 lesser_difference_actions.append(new_action)
         return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
-    def cutoff_depth(self, current_depth):
+    def cutoff_depth(self, current_depth, state: GameStateAbalone):
         # TODO : déterminer un depth
-        if 25 - self.number_of_actions < cutoff_depth:
-            return current_depth > 25 - self.number_of_actions
+        if 50 - state.step < cutoff_depth:
+            return current_depth > 50 - state.step
         return current_depth > cutoff_depth
 
     def heuristic(self, state):
@@ -158,14 +157,14 @@ class MyPlayer(PlayerAbalone):
                                                                                                   self.other_player))
         return score
 
-    def distance_to_center_heuristic(self, state: GameState, piece_type: str):
+    def distance_to_center_heuristic(self, state: GameStateAbalone, piece_type: str):
         score = 0
         for key, value in state.get_rep().env.items():
             if value.piece_type == piece_type:
                 score += self.euclidian_distance_to_center(key)
         return score
 
-    def pieces_together_heuristic(self, state: GameState, piece_type: str):
+    def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
         score = 0
         for key, value in state.get_rep().env.items():
             if value.piece_type == piece_type:
