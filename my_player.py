@@ -13,8 +13,6 @@ center = (8, 4)
 max_line_length = 9
 nb_piece_colors = 2
 coordinates_in_same_row = [((-1, -1), (1, 1)), ((-2, 0), (2, 0)), ((-1, 1), (1, -1))]
-overflow_coordinates = {(-1, -1): (-2, -2), (-2, 0): (-4, 0), (-1, 1): (-2, 2), (1, 1): (2, 2), (2, 0): (4, 0),
-                        (1, -1): (2, -2)}
 
 
 class MyPlayer(PlayerAbalone):
@@ -151,6 +149,7 @@ class MyPlayer(PlayerAbalone):
         score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
                                                                                                                  self.piece_type)
         score += (self.pieces_alive(state, self.piece_type) - self.pieces_alive(state, self.other_player)) * 1000
+        score += (self.pieces_together_heuristic(state, self.piece_type) - self.pieces_together_heuristic(state, self.piece_type))
         score += (self.pieces_in_a_row_heuristic(state, self.piece_type) - self.pieces_in_a_row_heuristic(state,
                                                                                                   self.other_player))
         return score
@@ -161,6 +160,17 @@ class MyPlayer(PlayerAbalone):
             if value.piece_type == piece_type:
                 score += self.euclidian_distance_to_center(key)
         return score
+
+    def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
+        number_of_pieces_around = 0
+        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
+
+        for coordinate in coordinates:
+            for row_coordinates in coordinates_in_same_row:
+                for coordinate_difference in row_coordinates:
+                    if (piece := state.get_rep().env.get(self.calculate_neighbor_coordinate(coordinate, coordinate_difference))) and piece.piece_type == piece_type:
+                        number_of_pieces_around += 1
+        return number_of_pieces_around
 
     def pieces_in_a_row_heuristic(self, state: GameStateAbalone, piece_type: str):
         score = 0
@@ -180,7 +190,7 @@ class MyPlayer(PlayerAbalone):
                         score -= 2
 
                 elif coordinates_to_check[0] in coordinates or coordinates_to_check[1] in coordinates:
-                    score += 0.5
+                    score += 1
 
         return score
 
