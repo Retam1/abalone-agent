@@ -205,8 +205,8 @@ class MyPlayer(PlayerAbalone):
 
     def pieces_alive(self, state, piece_type):
         score = 0
-        for key, value in state.get_rep().env.items():
-            if value.piece_type == piece_type:
+        for piece in state.get_rep().env.values():
+            if piece.piece_type == piece_type:
                 score += 10
         return score
 
