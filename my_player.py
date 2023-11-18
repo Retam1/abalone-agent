@@ -153,6 +153,7 @@ class MyPlayer(PlayerAbalone):
         score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
                                                                                                                  self.piece_type)
         score += (self.pieces_alive(state, self.piece_type) - self.pieces_alive(state, self.other_player)) * 1000
+        score += (self.pieces_together_heuristic(state, self.piece_type) - self.pieces_together_heuristic(state, self.piece_type))
         score += (self.pieces_in_a_row_heuristic(state, self.piece_type) - self.pieces_in_a_row_heuristic(state,
                                                                                                   self.other_player))
         return score
@@ -163,6 +164,17 @@ class MyPlayer(PlayerAbalone):
             if value.piece_type == piece_type:
                 score += self.euclidian_distance_to_center(key)
         return score
+
+    def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
+        number_of_pieces_around = 0
+        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
+
+        for key, value in coordinates:
+            for coordinate_in_same_row in coordinates_in_same_row:
+                for coordinate_difference in coordinate_in_same_row:
+                    if (piece := state.get_rep().env.get(self.calculate_neighbor_coordinate(key, coordinate_difference))) and piece.piece_type == piece_type:
+                        number_of_pieces_around += 1
+        return number_of_pieces_around
 
     def pieces_in_a_row_heuristic(self, state: GameStateAbalone, piece_type: str):
         score = 0
