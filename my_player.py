@@ -182,7 +182,7 @@ class MyPlayer(PlayerAbalone):
                         score -= 2
 
                 elif coordinates_to_check[0] in coordinates or coordinates_to_check[1] in coordinates:
-                    score += 0.5
+                    score += 1
 
         return score
 
