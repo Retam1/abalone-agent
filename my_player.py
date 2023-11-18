@@ -61,7 +61,7 @@ class MyPlayer(PlayerAbalone):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        if self.cutoff_depth(depth, state):
+        if self.cutoff_depth(depth):
             return self.heuristic(state), None
 
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
@@ -93,7 +93,7 @@ class MyPlayer(PlayerAbalone):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        if self.cutoff_depth(depth, state):
+        if self.cutoff_depth(depth):
             return self.heuristic(state), None
 
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
@@ -142,10 +142,8 @@ class MyPlayer(PlayerAbalone):
                 lesser_difference_actions.append(new_action)
         return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
-    def cutoff_depth(self, current_depth, state: GameStateAbalone):
+    def cutoff_depth(self, current_depth):
         # TODO : déterminer un depth
-        if 50 - state.step < cutoff_depth:
-            return current_depth > 50 - state.step
         return current_depth > cutoff_depth
 
     def heuristic(self, state):
