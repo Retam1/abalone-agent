@@ -156,6 +156,9 @@ class MyPlayer(PlayerAbalone):
                 score += self.euclidian_distance_to_center(key)
         return score
 
+    def calculate_neighbor_coordinate(self, coordinate: tuple[int, int], difference: tuple[int, int]):
+        return coordinate[0] + difference[0], coordinate[1] + difference[1]
+
     def euclidian_distance_to_center(self, position: tuple[int, int]):
         return ((position[0] - center[0]) ** 2 + (position[1] - center[1]) ** 2) ** 0.5
 
