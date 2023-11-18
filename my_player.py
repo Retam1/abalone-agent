@@ -140,11 +140,11 @@ class MyPlayer(PlayerAbalone):
                 lesser_difference_actions.append(new_action)
         return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
-    def cutoff_depth(self, current_depth):
+    def cutoff_depth(self, current_depth: int):
         # TODO : déterminer un depth
         return current_depth > cutoff_depth
 
-    def heuristic(self, state):
+    def heuristic(self, state: GameStateAbalone):
         score = 0
         score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
                                                                                                                  self.piece_type)
@@ -242,7 +242,7 @@ class TranspositionTable:
 
         return hash
 
-    def record(self, hash, score, action, depth):
+    def record(self, hash: int, score: float, action: Action, depth: int):
         if hash not in self.hash_table:
             self.hash_table[hash] = {}
 
