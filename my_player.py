@@ -142,12 +142,11 @@ class MyPlayer(PlayerAbalone):
                 lesser_difference_actions.append(new_action)
         return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
-    def cutoff_depth(self, depth):
+    def cutoff_depth(self, current_depth):
         # TODO : déterminer un depth
-        if self.number_of_actions <= 15:
-            return depth > 2
-        else:
-            return depth > 2
+        if 25 - self.number_of_actions <= cutoff_depth:
+            return current_depth > 25 - self.number_of_actions
+        return current_depth > cutoff_depth
 
     def heuristic(self, state):
         score = 0
