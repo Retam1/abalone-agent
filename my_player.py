@@ -11,6 +11,7 @@ infinity = math.inf
 center = (8, 4)
 max_line_length = 9
 nb_piece_colors = 2
+coordinates_in_same_row = [((-1, -1), (1, 1)), ((-2, 0), (2, 0)), ((-1, 1), (1, -1))]
 
 
 class MyPlayer(PlayerAbalone):
