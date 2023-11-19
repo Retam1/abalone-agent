@@ -61,14 +61,14 @@ class MyPlayer(PlayerAbalone):
     def max_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int) -> Tuple[float, Optional[Action]]:
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
-
-        if self.cutoff_depth(depth, state.get_step()):
-            return self.heuristic(state), None
-
+        
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
         if hash in self.transposition_table.hash_table and self.transposition_table.hash_table[hash]['depth'] <= depth:
             return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash][
                 'action']
+
+        if self.cutoff_depth(depth, state.get_step()):
+            return self.heuristic(state), None
 
         score = -INFINITY
         action = None
@@ -94,13 +94,13 @@ class MyPlayer(PlayerAbalone):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        if self.cutoff_depth(depth, state.get_step()):
-            return self.heuristic(state), None
-
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
         if hash in self.transposition_table.hash_table and self.transposition_table.hash_table[hash]['depth'] <= depth:
             return self.transposition_table.hash_table[hash]['score'], self.transposition_table.hash_table[hash][
                 'action']
+        
+        if self.cutoff_depth(depth, state.get_step()):
+            return self.heuristic(state), None
 
         score = INFINITY
         action = None
