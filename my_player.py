@@ -115,7 +115,7 @@ class MyPlayer(PlayerAbalone):
 
             if score <= alpha:
                 break
-            
+
         self.transposition_table.record(hash, score, action, depth)
         return score, action
 
@@ -146,12 +146,16 @@ class MyPlayer(PlayerAbalone):
 
     def heuristic(self, state: GameStateAbalone):
         score = 0
-        score += self.distance_to_center_heuristic(state, self.other_player) - self.distance_to_center_heuristic(state,
-                                                                                                                 self.piece_type)
+        score += self.distance_to_center_heuristic(state, self.other_player) - \
+                 self.distance_to_center_heuristic(state, self.piece_type)
+
         score += (self.pieces_alive(state, self.piece_type) - self.pieces_alive(state, self.other_player)) * 1000
-        score += (self.pieces_together_heuristic(state, self.piece_type) - self.pieces_together_heuristic(state, self.piece_type))
-        score += (self.pieces_in_a_row_heuristic(state, self.piece_type) - self.pieces_in_a_row_heuristic(state,
-                                                                                                  self.other_player))
+
+        score += (self.pieces_together_heuristic(state, self.piece_type) -
+                  self.pieces_together_heuristic(state, self.piece_type))
+
+        score += (self.pieces_in_a_row_heuristic(state, self.piece_type) -
+                  self.pieces_in_a_row_heuristic(state, self.other_player))
         return score
 
     def distance_to_center_heuristic(self, state: GameStateAbalone, piece_type: str):
@@ -163,28 +167,34 @@ class MyPlayer(PlayerAbalone):
 
     def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
         number_of_pieces_around = 0
-        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
+        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if
+                       piece.piece_type == piece_type}
 
         for coordinate in coordinates:
             for row_coordinates in COORDINATES_IN_SAME_ROW:
                 for coordinate_difference in row_coordinates:
-                    if (piece := state.get_rep().env.get(self.calculate_neighbor_coordinate(coordinate, coordinate_difference))) and piece.piece_type == piece_type:
+                    if (piece := state.get_rep().env.get(
+                            self.calculate_neighbor_coordinate(coordinate, coordinate_difference))) \
+                            and piece.piece_type == piece_type:
                         number_of_pieces_around += 1
         return number_of_pieces_around
 
     def pieces_in_a_row_heuristic(self, state: GameStateAbalone, piece_type: str):
         score = 0
-        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if piece.piece_type == piece_type}
+        coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if
+                       piece.piece_type == piece_type}
 
         for coordinate in coordinates:
             for row_coordinates in COORDINATES_IN_SAME_ROW:
                 coordinates_to_check = self.calculate_neighbor_coordinate(coordinate, row_coordinates[0]), \
-                                        self.calculate_neighbor_coordinate(coordinate, row_coordinates[1])
+                                       self.calculate_neighbor_coordinate(coordinate, row_coordinates[1])
 
                 if coordinates_to_check[0] in coordinates and coordinates_to_check[1] in coordinates:
                     score += 2
-                    outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0], row_coordinates[0]), \
-                                            self.calculate_neighbor_coordinate(coordinates_to_check[1], row_coordinates[1])
+                    outer_coordinates_to_check = self.calculate_neighbor_coordinate(coordinates_to_check[0],
+                                                                                    row_coordinates[0]), \
+                                                 self.calculate_neighbor_coordinate(coordinates_to_check[1],
+                                                                                    row_coordinates[1])
 
                     if outer_coordinates_to_check[0] in coordinates or outer_coordinates_to_check[1] in coordinates:
                         score -= 2
