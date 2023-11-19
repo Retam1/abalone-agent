@@ -37,7 +37,7 @@ class MyPlayer(PlayerAbalone):
         super().__init__(piece_type, name, time_limit, *args)
         self.other_player = 'W' if self.get_piece_type() == 'B' else 'B'
         self.transposition_table = TranspositionTable()
-        self.time_limit = 0.0
+        self.step_time_limit = 0.0
 
     def compute_action(self, current_state: GameStateAbalone, **kwargs) -> Action:
         """
@@ -51,7 +51,7 @@ class MyPlayer(PlayerAbalone):
             Action: selected feasible action
         """
         if current_state.get_step() >= 35:
-            self.time_limit = time.time() + TIME_LIMIT
+            self.step_time_limit = time.time() + TIME_LIMIT
         score, action = self.minimax_search(current_state)
         return action
 
@@ -145,7 +145,7 @@ class MyPlayer(PlayerAbalone):
 
     def cutoff_depth(self, current_depth: int, step: int) -> bool:
         # TODO : déterminer un depth
-        return current_depth > CUTOFF_DEPTH + 1 or time.time() > self.time_limit if step >= 35 \
+        return current_depth > CUTOFF_DEPTH + 1 or time.time() > self.step_time_limit if step >= 35 \
             else current_depth > CUTOFF_DEPTH
 
     def heuristic(self, state: GameStateAbalone) -> float:
