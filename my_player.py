@@ -1,6 +1,7 @@
 # Authors: Émile Watier (2115718) and Lana Pham (2116078)
 import math
 import random
+import time
 
 from typing import List, Union, Tuple, Optional
 from game_state_abalone import GameStateAbalone
@@ -8,6 +9,7 @@ from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
 
 CUTOFF_DEPTH = 2
+TIME_LIMIT = 95
 INFINITY = math.inf
 CENTER = (8, 4)
 MAX_LINE_LENGTH = 9
@@ -35,6 +37,7 @@ class MyPlayer(PlayerAbalone):
         super().__init__(piece_type, name, time_limit, *args)
         self.other_player = 'W' if self.get_piece_type() == 'B' else 'B'
         self.transposition_table = TranspositionTable()
+        self.time_limit = 0.0
 
     def compute_action(self, current_state: GameStateAbalone, **kwargs) -> Action:
         """
@@ -47,9 +50,9 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
-
+        if current_state.get_step() >= 35:
+            self.time_limit = time.time() + TIME_LIMIT
         score, action = self.minimax_search(current_state)
-
         return action
 
     def minimax_search(self, initial_state: GameStateAbalone) -> Tuple[float, Action]:
@@ -59,7 +62,7 @@ class MyPlayer(PlayerAbalone):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        if self.cutoff_depth(depth):
+        if self.cutoff_depth(depth, state.get_step()):
             return self.heuristic(state), None
 
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
@@ -91,7 +94,7 @@ class MyPlayer(PlayerAbalone):
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
-        if self.cutoff_depth(depth):
+        if self.cutoff_depth(depth, state.get_step()):
             return self.heuristic(state), None
 
         hash = self.transposition_table.compute_hash(state.get_rep().get_grid())
@@ -140,9 +143,10 @@ class MyPlayer(PlayerAbalone):
                 lesser_difference_actions.append(new_action)
         return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
-    def cutoff_depth(self, current_depth: int) -> bool:
+    def cutoff_depth(self, current_depth: int, step: int) -> bool:
         # TODO : déterminer un depth
-        return current_depth > CUTOFF_DEPTH
+        return current_depth > CUTOFF_DEPTH + 1 or time.time() > self.time_limit if step >= 35 \
+            else current_depth > CUTOFF_DEPTH
 
     def heuristic(self, state: GameStateAbalone) -> float:
         score = 0
