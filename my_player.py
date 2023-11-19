@@ -1,8 +1,8 @@
 # Authors: Émile Watier (2115718) and Lana Pham (2116078)
 import math
 import random
-from typing import List, Union
 
+from typing import List, Union, Tuple, Optional
 from game_state_abalone import GameStateAbalone
 from player_abalone import PlayerAbalone
 from seahorse.game.action import Action
@@ -52,10 +52,10 @@ class MyPlayer(PlayerAbalone):
 
         return action
 
-    def minimax_search(self, initial_state: GameStateAbalone):
+    def minimax_search(self, initial_state: GameStateAbalone) -> Tuple[float, Action]:
         return self.max_value(initial_state, -INFINITY, INFINITY, 0)
 
-    def max_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int):
+    def max_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int) -> Tuple[float, Optional[Action]]:
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
@@ -87,7 +87,7 @@ class MyPlayer(PlayerAbalone):
         self.transposition_table.record(hash, score, action, depth)
         return score, action
 
-    def min_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int):
+    def min_value(self, state: GameStateAbalone, alpha: float, beta: float, depth: int) -> Tuple[float, Optional[Action]]:
         if state.is_done():
             return state.get_scores().get(state.get_next_player().get_id()), None
 
@@ -119,7 +119,7 @@ class MyPlayer(PlayerAbalone):
         self.transposition_table.record(hash, score, action, depth)
         return score, action
 
-    def get_sorted_actions(self, state: GameStateAbalone):
+    def get_sorted_actions(self, state: GameStateAbalone) -> List[Action]:
         pieces_difference = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
 
         actions = state.get_possible_actions()
@@ -140,11 +140,11 @@ class MyPlayer(PlayerAbalone):
                 lesser_difference_actions.append(new_action)
         return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
-    def cutoff_depth(self, current_depth: int):
+    def cutoff_depth(self, current_depth: int) -> bool:
         # TODO : déterminer un depth
         return current_depth > CUTOFF_DEPTH
 
-    def heuristic(self, state: GameStateAbalone):
+    def heuristic(self, state: GameStateAbalone) -> float:
         score = 0
         score += self.distance_to_center_heuristic(state, self.other_player) - \
                  self.distance_to_center_heuristic(state, self.piece_type)
@@ -158,14 +158,14 @@ class MyPlayer(PlayerAbalone):
                   self.pieces_in_a_row_heuristic(state, self.other_player))
         return score
 
-    def distance_to_center_heuristic(self, state: GameStateAbalone, piece_type: str):
+    def distance_to_center_heuristic(self, state: GameStateAbalone, piece_type: str) -> float:
         score = 0
         for coordinate, piece in state.get_rep().env.items():
             if piece.piece_type == piece_type:
                 score += self.euclidian_distance(coordinate, CENTER)
         return score
 
-    def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str):
+    def pieces_together_heuristic(self, state: GameStateAbalone, piece_type: str) -> int:
         number_of_pieces_around = 0
         coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if
                        piece.piece_type == piece_type}
@@ -179,7 +179,7 @@ class MyPlayer(PlayerAbalone):
                         number_of_pieces_around += 1
         return number_of_pieces_around
 
-    def pieces_in_a_row_heuristic(self, state: GameStateAbalone, piece_type: str):
+    def pieces_in_a_row_heuristic(self, state: GameStateAbalone, piece_type: str) -> float:
         score = 0
         coordinates = {coordinate for coordinate, piece in state.get_rep().env.items() if
                        piece.piece_type == piece_type}
@@ -204,13 +204,13 @@ class MyPlayer(PlayerAbalone):
 
         return score
 
-    def calculate_neighbor_coordinate(self, coordinate: tuple[int, int], difference: tuple[int, int]):
+    def calculate_neighbor_coordinate(self, coordinate: Tuple[int, int], difference: Tuple[int, int]) -> Tuple[int, int]:
         return coordinate[0] + difference[0], coordinate[1] + difference[1]
 
-    def euclidian_distance(self, position1: tuple[int, int], position2: tuple[int, int]):
+    def euclidian_distance(self, position1: Tuple[int, int], position2: Tuple[int, int]) -> float:
         return ((position1[0] - position2[0]) ** 2 + (position1[1] - position2[1]) ** 2) ** 0.5
 
-    def pieces_alive(self, state, piece_type):
+    def pieces_alive(self, state, piece_type) -> int:
         score = 0
         for piece in state.get_rep().env.values():
             if piece.piece_type == piece_type:
