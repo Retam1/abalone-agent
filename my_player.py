@@ -154,8 +154,8 @@ class MyPlayer(PlayerAbalone):
         score += (self.pieces_together_heuristic(state, self.piece_type) -
                   self.pieces_together_heuristic(state, self.other_player))
 
-        # score += (self.pieces_in_a_row_heuristic(state, self.piece_type) -
-        #           self.pieces_in_a_row_heuristic(state, self.other_player))
+        score += (self.pieces_in_a_row_heuristic(state, self.piece_type) -
+                  self.pieces_in_a_row_heuristic(state, self.other_player))
         return score
 
     def distance_to_center_heuristic(self, state: GameStateAbalone, piece_type: str) -> float:
