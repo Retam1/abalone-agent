@@ -13,7 +13,7 @@ CENTER = (8, 4)
 MAX_LINE_LENGTH = 9
 NB_PIECE_COLORS = 2
 COORDINATES_IN_SAME_ROW = [((-1, -1), (1, 1)), ((-2, 0), (2, 0)), ((-1, 1), (1, -1))]
-DEEPER_SEARCH_CUTOFF = 36
+DEEPER_SEARCH_CUTOFF = 40
 
 
 class MyPlayer(PlayerAbalone):
