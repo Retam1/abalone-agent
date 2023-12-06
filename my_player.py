@@ -71,7 +71,7 @@ class MyPlayer(PlayerAbalone):
         score = -INFINITY
         action = None
 
-        actions = state.get_possible_actions() if state.get_step() <= 10 else self.get_sorted_actions(state)
+        actions = state.get_possible_actions() if state.get_step() <= 10 else self.get_sorted_actions(state, True)
 
         for new_action in actions:
             new_state = new_action.get_next_game_state()
@@ -103,7 +103,7 @@ class MyPlayer(PlayerAbalone):
         score = INFINITY
         action = None
 
-        actions = state.get_possible_actions() if state.get_step() <= 10 else self.get_sorted_actions(state)
+        actions = state.get_possible_actions() if state.get_step() <= 10 else self.get_sorted_actions(state, False)
 
         for new_action in actions:
             new_state = new_action.get_next_game_state()
@@ -120,7 +120,7 @@ class MyPlayer(PlayerAbalone):
         self.transposition_table.record(hash, score, action, depth)
         return score, action
 
-    def get_sorted_actions(self, state: GameStateAbalone) -> List[Action]:
+    def get_sorted_actions(self, state: GameStateAbalone, max_player: bool) -> List[Action]:
         pieces_difference = self.pieces_alive(state, self.id) - self.pieces_alive(state, self.other_player)
 
         actions = state.get_possible_actions()
@@ -139,7 +139,8 @@ class MyPlayer(PlayerAbalone):
                 equal_difference_actions.append(new_action)
             else:
                 lesser_difference_actions.append(new_action)
-        return larger_difference_actions + equal_difference_actions + lesser_difference_actions
+        return larger_difference_actions + equal_difference_actions + lesser_difference_actions if max_player else \
+            lesser_difference_actions + equal_difference_actions + larger_difference_actions
 
     def cutoff_depth(self, current_depth: int) -> bool:
         return current_depth > (CUTOFF_DEPTH if self.current_step <= DEEPER_SEARCH_CUTOFF else CUTOFF_DEPTH + 1)
