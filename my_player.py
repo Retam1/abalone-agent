@@ -152,7 +152,7 @@ class MyPlayer(PlayerAbalone):
         score += (self.pieces_alive(state, self.piece_type) - self.pieces_alive(state, self.other_player)) * 1000
 
         score += (self.pieces_together_heuristic(state, self.piece_type) -
-                  self.pieces_together_heuristic(state, self.piece_type))
+                  self.pieces_together_heuristic(state, self.other_player))
 
         # score += (self.pieces_in_a_row_heuristic(state, self.piece_type) -
         #           self.pieces_in_a_row_heuristic(state, self.other_player))
