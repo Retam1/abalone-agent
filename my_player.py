@@ -142,7 +142,7 @@ class MyPlayer(PlayerAbalone):
         return larger_difference_actions + equal_difference_actions + lesser_difference_actions
 
     def cutoff_depth(self, current_depth: int) -> bool:
-        return current_depth > CUTOFF_DEPTH if self.current_step <= DEEPER_SEARCH_CUTOFF else current_depth > CUTOFF_DEPTH + 1
+        return current_depth > (CUTOFF_DEPTH if self.current_step <= DEEPER_SEARCH_CUTOFF else CUTOFF_DEPTH + 1)
 
     def heuristic(self, state: GameStateAbalone) -> float:
         score = 0
